@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+python-dotenv
+pydantic
+youtube-transcript-api
+groq
+neo4j
+httpx
+pytube
+python-multipart
+urllib3
+pyOpenSSL
