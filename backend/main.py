@@ -18,7 +18,7 @@ load_dotenv()
 
 app = FastAPI()
 
-# Enable CORS for cross-origin requests
+# Enable CORS for all origins
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
