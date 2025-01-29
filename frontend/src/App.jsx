@@ -8,6 +8,7 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import HistoryIcon from '@mui/icons-material/History';
 import CloseIcon from '@mui/icons-material/Close';
+import config from './config';
 
 const getTheme = (mode) => createTheme({
   palette: {
@@ -181,7 +182,7 @@ function App() {
         reader.onloadend = async () => {
           const base64Audio = reader.result;
           try {
-            const response = await axios.post('http://localhost:8000/speech-to-text', {
+            const response = await axios.post(`${config.apiBaseUrl}/speech-to-text`, {
               audio_data: base64Audio,
               language: language
             });
@@ -211,7 +212,7 @@ function App() {
     e.preventDefault();
     setLoading(true);
     try {
-      const response = await axios.post('http://localhost:8000/process-video', {
+      const response = await axios.post(`${config.apiBaseUrl}/process-video`, {
         video_url: videoUrl,
         style: style,
         word_count: wordCount,
@@ -229,7 +230,7 @@ function App() {
     
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:8000/ask-question', {
+      const response = await axios.post(`${config.apiBaseUrl}/ask-question`, {
         video_url: videoUrl,
         question: question,
         language: language,
