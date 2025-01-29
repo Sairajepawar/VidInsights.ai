@@ -18,7 +18,7 @@ load_dotenv()
 
 app = FastAPI()
 
-# Add CORS middleware
+# Enable CORS for cross-origin requests
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -163,7 +163,7 @@ def create_knowledge_graph(video_id: str, transcript_text: str):
         )
 
 def enforce_language(text: str, target_language: str) -> str:
-    """Ensure the text is in the specified language"""
+    """Ensure the text is in the specified language using appropriate grammar and script"""
     language_prompts = {
         "english": "Translate this to English if it's not already in English: ",
         "hindi": "Translate this to Hindi (हिंदी) using Devanagari script: ",
