@@ -27,6 +27,14 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+@app.get("/")
+async def hello():
+    return {
+        "message": "Hello from VidInsights.ai API!",
+        "status": "online",
+        "version": "1.0.0"
+    }
+
 groq_client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # Neo4j setup
