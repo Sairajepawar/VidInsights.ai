@@ -108,11 +108,16 @@ def create_knowledge_graph(video_id: str, transcript_text: str):
             # First, test the connection
             session.run("RETURN 1")
             
-            # Clear existing nodes for this video
-            session.run("""
-                MATCH (n:Video {video_id: $video_id}) 
-                DETACH DELETE n
+            # check video already exists in knowledge graph
+            result = session.run("""
+                MATCH (v:Video {video_id: $video_id}) 
+                RETURN v LIMIT 1
             """, video_id=video_id)
+            
+            if result.single():
+                print(f"Video with ID '{video_id}' already exists. Aborting operation.")
+                return  # Stop function if video already exists
+
             
             # Create video node
             session.run("""
@@ -349,7 +354,6 @@ async def speech_to_text(request: SpeechToTextRequest):
 async def process_video(request: VideoRequest):
     try:
         video_id = extract_video_id(request.video_url)
-        
         try:
             transcript = YouTubeTranscriptApi.get_transcript(video_id)
             formatter = TextFormatter()
