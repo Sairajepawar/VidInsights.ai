@@ -13,6 +13,7 @@ from typing import Optional, List, Dict
 import ssl
 from neo4j import GraphDatabase
 from urllib3.util import ssl_
+from gtts import gTTS
 
 load_dotenv()
 
@@ -416,6 +417,32 @@ async def ask_question(request: QuestionRequest):
         
     except HTTPException as he:
         raise he
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Define a Pydantic model for the request body
+class TextToSpeechRequest(BaseModel):
+    text: str
+    lang: str
+
+@app.post("/text-to-speech")
+async def text_to_speech(request: TextToSpeechRequest):
+    try:
+        # Create a gTTS object
+        tts = gTTS(text=request.text, lang=request.lang, slow=False)
+        
+        # Save the audio to a temporary file
+        audio_file = "temp_audio.mp3"
+        tts.save(audio_file)
+        
+        # Read the audio file and encode it to base64
+        with open(audio_file, "rb") as audio:
+            audio_base64 = base64.b64encode(audio.read()).decode('utf-8')
+        
+        # Clean up the temporary file
+        os.remove(audio_file)
+        
+        return {"audioContent": audio_base64}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
