@@ -8,7 +8,10 @@ import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import HistoryIcon from '@mui/icons-material/History';
 import CloseIcon from '@mui/icons-material/Close';
+import VolumeUpIcon from '@mui/icons-material/VolumeUp';
 import config from './config';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
+import PauseIcon from '@mui/icons-material/Pause';
 
 const getTheme = (mode) => createTheme({
   palette: {
@@ -146,6 +149,7 @@ function App() {
   const [isRecording, setIsRecording] = useState(false);
   const [mode, setMode] = useState(() => localStorage.getItem('theme') || 'dark');
   const [selectedQA, setSelectedQA] = useState(null);
+  const [isSpeaking, setIsSpeaking] = useState(false);
   const [qaHistory, setQaHistory] = useState(() => {
     const saved = localStorage.getItem('qaHistory');
     return saved ? JSON.parse(saved) : [];
@@ -162,6 +166,56 @@ function App() {
   useEffect(() => {
     localStorage.setItem('qaHistory', JSON.stringify(qaHistory));
   }, [qaHistory]);
+
+  // Text-to-Speech Function
+  const languageMap = {
+    english: 'en',
+    hindi: 'hi',
+    marathi: 'mr',
+    gujarati: 'gu',
+    bengali: 'bn',
+    kannada: 'kn',
+  };
+  
+  const speakText = async (text) => {
+    try {
+      const langCode = languageMap[language]; // Convert language name to code
+      console.log(langCode);
+      console.log(text);
+      const response = await axios.post(`${config.apiBaseUrl}/text-to-speech`, {
+        text: text,
+        lang: langCode
+      });
+  
+      const audioContent = response.data.audioContent;
+      const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
+      audio.play();
+  
+      audio.onplay = () => setIsSpeaking(true);
+      audio.onended = () => setIsSpeaking(false);
+      audio.onerror = () => setIsSpeaking(false);
+    } catch (error) {
+      console.error('Error playing speech:', error);
+    }
+  };
+  
+  const pauseSpeaking = () => {
+    // Pause the audio if needed
+    const audio = document.querySelector('audio');
+    if (audio) {
+      audio.pause();
+      setIsSpeaking(false);
+    }
+  };
+  
+  const resumeSpeaking = () => {
+    // Resume the audio if needed
+    const audio = document.querySelector('audio');
+    if (audio) {
+      audio.play();
+      setIsSpeaking(true);
+    }
+  };
 
   const startRecording = async () => {
     try {
@@ -509,13 +563,29 @@ function App() {
                 Summary
               </Typography>
               {summary ? (
-                <Typography sx={{ 
-                  whiteSpace: 'pre-wrap',
-                  color: 'text.primary',
-                  lineHeight: 1.7
-                }}>
-                  {summary}
-                </Typography>
+                <Box>
+                  <Typography sx={{ 
+                    whiteSpace: 'pre-wrap',
+                    color: 'text.primary',
+                    lineHeight: 1.7
+                  }}>
+                    {summary}
+                  </Typography>
+                  {/* speaking button */}
+                  <IconButton 
+                    onClick={() => {
+                      if (isSpeaking) {
+                        pauseSpeaking();
+                      } else {
+                        speakText(summary); // or speakText(answer) depending on the context
+                      }
+                    }}
+                    color="primary"
+                    sx={{ mt: 1 }}
+                  >
+                    {isSpeaking ? <PauseIcon /> : <PlayArrowIcon />}
+                  </IconButton>
+                </Box>
               ) : (
                 <Box sx={{ 
                   display: 'flex', 
@@ -579,6 +649,20 @@ function App() {
                   }}>
                     {answer}
                   </Typography>
+                  {/* speaking button */}
+                  <IconButton 
+                    onClick={() => {
+                      if (isSpeaking) {
+                        pauseSpeaking();
+                      } else {
+                        speakText(answer); // or speakText(answer) depending on the context
+                      }
+                    }}
+                    color="primary"
+                    sx={{ mt: 1 }}
+                  >
+                    {isSpeaking ? <PauseIcon /> : <PlayArrowIcon />}
+                  </IconButton>
                 </Box>
               )}
             </Paper>
@@ -626,6 +710,20 @@ function App() {
                 <Typography variant="body1" paragraph>
                   {selectedQA.question}
                 </Typography>
+                {/* speaking button */}
+                <IconButton 
+                  onClick={() => {
+                    if (isSpeaking) {
+                      pauseSpeaking();
+                    } else {
+                      speakText(selectedQA.question); // or speakText(answer) depending on the context
+                    }
+                  }}
+                  color="primary"
+                  sx={{ mt: 1 }}
+                >
+                  {isSpeaking ? <PauseIcon /> : <PlayArrowIcon />}
+                </IconButton>
               </Box>
               <Box>
                 <Typography variant="subtitle1" color="primary" gutterBottom>
@@ -634,6 +732,20 @@ function App() {
                 <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
                   {selectedQA.answer}
                 </Typography>
+                {/* speaking button */}
+                <IconButton 
+                  onClick={() => {
+                    if (isSpeaking) {
+                      pauseSpeaking();
+                    } else {
+                      speakText(selectedQA.answer); // or speakText(answer) depending on the context
+                    }
+                  }}
+                  color="primary"
+                  sx={{ mt: 1 }}
+                >
+                  {isSpeaking ? <PauseIcon /> : <PlayArrowIcon />}
+                </IconButton>
               </Box>
               <Typography 
                 variant="caption" 
