@@ -22,10 +22,11 @@ app = FastAPI()
 # Enable CORS for all origins
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=["*","http://localhost:5173"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+
 )
 
 @app.get("/")
@@ -194,6 +195,7 @@ def enforce_language(text: str, target_language: str) -> str:
     
     Important: If the target language is Marathi, ensure it's proper Marathi language and not Hindi.
     Use appropriate grammar, vocabulary, and expressions specific to the target language.
+    Do not add any disclaimer or translation notes, Also, Dont mention anything about nodes.
     """
     
     response = groq_client.chat.completions.create(
@@ -425,6 +427,7 @@ class TextToSpeechRequest(BaseModel):
     text: str
     lang: str
 
+# test to speech route
 @app.post("/text-to-speech")
 async def text_to_speech(request: TextToSpeechRequest):
     try:

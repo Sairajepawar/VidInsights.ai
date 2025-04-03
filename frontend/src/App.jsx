@@ -150,6 +150,8 @@ function App() {
   const [mode, setMode] = useState(() => localStorage.getItem('theme') || 'dark');
   const [selectedQA, setSelectedQA] = useState(null);
   const [isSpeaking, setIsSpeaking] = useState(false);
+  const [audioInstance, setAudioInstance] = useState(null);
+  const [pausedTime, setPausedTime] = useState(0);
   const [qaHistory, setQaHistory] = useState(() => {
     const saved = localStorage.getItem('qaHistory');
     return saved ? JSON.parse(saved) : [];
@@ -179,9 +181,8 @@ function App() {
   
   const speakText = async (text) => {
     try {
-      const langCode = languageMap[language]; // Convert language name to code
-      console.log(langCode);
-      console.log(text);
+      const langCode = languageMap[language];
+      
       const response = await axios.post(`${config.apiBaseUrl}/text-to-speech`, {
         text: text,
         lang: langCode
@@ -189,9 +190,14 @@ function App() {
   
       const audioContent = response.data.audioContent;
       const audio = new Audio(`data:audio/mp3;base64,${audioContent}`);
-      audio.play();
   
-      audio.onplay = () => setIsSpeaking(true);
+      // Store the audio instance
+      setAudioInstance(audio);
+      setPausedTime(0); // Reset paused time when starting new audio
+  
+      audio.play();
+      setIsSpeaking(true);
+  
       audio.onended = () => setIsSpeaking(false);
       audio.onerror = () => setIsSpeaking(false);
     } catch (error) {
@@ -200,22 +206,14 @@ function App() {
   };
   
   const pauseSpeaking = () => {
-    // Pause the audio if needed
-    const audio = document.querySelector('audio');
-    if (audio) {
-      audio.pause();
+    if (audioInstance) {
+      setPausedTime(audioInstance.currentTime); // Save the paused time
+      audioInstance.pause();
       setIsSpeaking(false);
     }
   };
   
-  const resumeSpeaking = () => {
-    // Resume the audio if needed
-    const audio = document.querySelector('audio');
-    if (audio) {
-      audio.play();
-      setIsSpeaking(true);
-    }
-  };
+  
 
   const startRecording = async () => {
     try {
@@ -360,7 +358,7 @@ function App() {
               WebkitTextFillColor: 'transparent',
             }}
           >
-            VidInsight.ai
+            VidInsights.ai
           </Typography>
           <IconButton onClick={toggleMode} color="inherit">
             {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
